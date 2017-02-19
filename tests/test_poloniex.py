@@ -1,16 +1,14 @@
 import unittest
-from poloniex import Poloniex
+from backend.api.poloniex.pypoloniex.poloniex.api import Poloniex
 
 from datetime import date, timedelta, datetime
 
-class TestPoloniex(object):
-
-    def setup(self):
+class TestPoloniex(unittest.TestCase):
+    def setUp(self):
         self.poloniex = Poloniex('', '')
 
     def test_ticker(self):
         res = self.poloniex.returnTicker()
-
         assert 'BTC_ETH' in res.keys()
         assert 'lowestAsk' in res['BTC_ETH'].keys()
         
@@ -38,6 +36,17 @@ class TestPoloniex(object):
     def test_chartdata(self):
         start = datetime.now() - timedelta(hours=1)
         res = self.poloniex.returnChartData('BTC_ETH', 300, start)
+
+        assert len(res)
+        assert 'date' in res[0].keys()
+        assert 'volume' in res[0].keys()
+        assert 'high' in res[0].keys()
+        assert 'low' in res[0].keys()
+        assert 'close' in res[0].keys()
+
+    def test_chartdatalargecall(self):
+        start = datetime.now() - timedelta(hours=1)
+        res = self.poloniex.returnChartDataLargeCall('USDT_BTC', 300, start)
 
         assert len(res)
         assert 'date' in res[0].keys()

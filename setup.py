@@ -6,13 +6,13 @@ if os.path.exists('README.txt'):
     long_description = open('README.txt').read()
 
 
-setuptools.setup(name='py-poloniex',
+setuptools.setup(name='pypoloniex',
                  version='0.4.1',
                  description='Python Poloniex API',
                  long_description=long_description,
                  author='Thiago Fernandes Macedo',
                  author_email='thiago@internetbudi.com.br',
-                 url='https://github.com/thiagof/py-poloniex',
+                 url='https://github.com/thiagof/pypoloniex',
                  py_modules=['poloniex'],
                  install_requires=[],
                  license='MIT License',

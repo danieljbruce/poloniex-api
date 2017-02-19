@@ -8,14 +8,15 @@ try:
     from urllib.parse import urlencode
 except ImportError:
     # Fall back to Python 2's urllib2
-    from urllib2 import urlopen, Request
+    # from urllib2 import urlopen, Request
     from urllib import urlencode
 
 import json
 import time, datetime
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import calendar
 import hmac,hashlib
+import math
 
 def createTimeStamp(datestr, format="%Y-%m-%d %H:%M:%S"):
     if type(datestr) in [date, datetime]:
@@ -30,7 +31,6 @@ class Poloniex:
     def __init__(self, APIKey, Secret, parseJson=True):
         self.APIKey = APIKey
         self.Secret = Secret
-
         self.parseJson = parseJson
  
     def post_process(self, before):
@@ -39,7 +39,7 @@ class Poloniex:
         # Add timestamps if there isnt one but is a datetime
         if('return' in after):
             if(isinstance(after['return'], list)):
-                for x in xrange(0, len(after['return'])):
+                for x in range(0, len(after['return'])):
                     if(isinstance(after['return'][x], dict)):
                         if('datetime' in after['return'][x] and 'timestamp' not in after['return'][x]):
                             after['return'][x]['timestamp'] = float(createTimeStamp(after['return'][x]['datetime']))
@@ -61,13 +61,13 @@ class Poloniex:
         if 'private' == type:
             post_data = urlencode(params)
             
-            sign = hmac.new(self.Secret, post_data, hashlib.sha512).hexdigest()
+            sign = hmac.new(self.Secret, post_data.encode('ascii'), hashlib.sha512).hexdigest()
             headers = {
                 'Sign': sign,
                 'Key': self.APIKey
             }
             
-            ret = urlopen(Request('https://poloniex.com/tradingApi', post_data, headers))
+            ret = urlopen(Request('https://poloniex.com/tradingApi', post_data.encode('ascii'), headers))
             # jsonRet = json.loads(ret.read())
             # return self.post_process(jsonRet)
         
@@ -110,8 +110,25 @@ class Poloniex:
             'end': createTimeStamp(end),
             'period': period
         })
- 
- 
+
+    def returnChartDataLargeCall (self, currencyPair, period=300, start=None, end=None): #
+        # end and start are datetime timestamps
+        if end is None:
+            end = datetime.utcnow()
+        intEnd = int(end.timestamp())
+        intEstimatedMaxJsonSize = 149600  # We need to separate the calls into chunks since return data is limited in size from server
+        intStart = int(start.timestamp())
+        intDataReturnSize = math.floor((intEnd - intStart) / period) + 1
+        intCallsNecessary = max(math.floor(intDataReturnSize / intEstimatedMaxJsonSize) + 1, 1)
+        jsonReturnData = []
+        for i in range(0, intCallsNecessary - 1):
+            callStart = start + timedelta(seconds=(period*intEstimatedMaxJsonSize*i))
+            callEnd = start + timedelta(seconds=(period*intEstimatedMaxJsonSize*(i+1)-period))
+            dataFromServer = self.returnChartData(currencyPair, period, callStart, callEnd)
+            jsonReturnData.extend(dataFromServer)
+        jsonReturnData.extend(self.returnChartData(currencyPair, period, start + timedelta(seconds=(period*intEstimatedMaxJsonSize*(intCallsNecessary-1))), end))
+        return jsonReturnData
+
     # Returns all of your balances.
     # Outputs:
     # {"BTC":"0.59098578","LTC":"3.31117268", ... }
