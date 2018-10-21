@@ -177,7 +177,7 @@ class Poloniex:
     # amount        Amount of coins to sell
     # Outputs:
     # orderNumber   The order number
-    def sell(self,currencyPair,rate,amount):
+    def sell(self,currencyPair, rate, amount):
         return self._private('sell',{"currencyPair":currencyPair,"rate":rate,"amount":amount})
  
     # Cancels an order you have placed in a given market. Required POST parameters are "currencyPair" and "orderNumber".
@@ -186,7 +186,7 @@ class Poloniex:
     # orderNumber   The order number to cancel
     # Outputs:
     # succes        1 or 0
-    def cancel(self,currencyPair,orderNumber):
+    def cancel(self,currencyPair, orderNumber):
         return self._private('cancelOrder',{"currencyPair":currencyPair,"orderNumber":orderNumber})
  
     # Immediately places a withdrawal for a given currency, with no email confirmation. In order to use this method, the withdrawal privilege must be enabled for your API key. Required POST parameters are "currency", "amount", and "address". Sample output: {"response":"Withdrew 2398 NXT."}
@@ -198,3 +198,23 @@ class Poloniex:
     # response      Text containing message about the withdrawal
     def withdraw(self, currency, amount, address):
         return self._private('withdraw',{"currency":currency, "amount":amount, "address":address})
+
+    # Places a buy order in a given market. Required POST parameters are "currencyPair", "rate", and "amount". If successful, the method will return the order number.
+    # Inputs:
+    # currencyPair  The curreny pair
+    # rate          price the order is buying at
+    # amount        Amount of coins to buy
+    # Outputs:
+    # orderNumber   The order number
+    def buy_immediate_or_cancel(self, currencyPair, rate, amount):
+        return self._private('buy', {"currencyPair": currencyPair, "rate": rate, "amount": amount, "immediateOrCancel": 1})
+
+    # Places a sell order in a given market. Required POST parameters are "currencyPair", "rate", and "amount". If successful, the method will return the order number.
+    # Inputs:
+    # currencyPair  The curreny pair
+    # rate          price the order is selling at
+    # amount        Amount of coins to sell
+    # Outputs:
+    # orderNumber   The order number
+    def sell_immediate_or_cancel(self, currencyPair, rate, amount):
+        return self._private('sell', {"currencyPair": currencyPair, "rate": rate, "amount": amount, "immediateOrCancel": 1})
