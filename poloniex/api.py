@@ -93,8 +93,11 @@ class Poloniex:
     def return24hVolume(self):
         return self._public("return24hVolume")
  
-    def returnOrderBook (self, currencyPair):
-        return self._public("returnOrderBook", {'currencyPair': currencyPair})
+    def returnOrderBook (self, currencyPair, depth=None):
+        if depth is None:
+            return self._public("returnOrderBook", {'currencyPair': currencyPair})
+        else:
+            return self._public("returnOrderBook", {'currencyPair': currencyPair, "depth": depth})
  
     def returnTradeHistory (self, currencyPair, start=None, end=None):
         return self._public("returnTradeHistory", {
@@ -218,3 +221,23 @@ class Poloniex:
     # orderNumber   The order number
     def sell_immediate_or_cancel(self, currencyPair, rate, amount):
         return self._private('sell', {"currencyPair": currencyPair, "rate": rate, "amount": amount, "immediateOrCancel": 1})
+
+    # Places a buy order in a given market. Required POST parameters are "currencyPair", "rate", and "amount". If successful, the method will return the order number.
+    # Inputs:
+    # currencyPair  The curreny pair
+    # rate          price the order is buying at
+    # amount        Amount of coins to buy
+    # Outputs:
+    # orderNumber   The order number
+    def buy_post_only(self, currencyPair, rate, amount):
+        return self._private('buy', {"currencyPair": currencyPair, "rate": rate, "amount": amount, "postOnly": 1})
+
+    # Places a sell order in a given market. Required POST parameters are "currencyPair", "rate", and "amount". If successful, the method will return the order number.
+    # Inputs:
+    # currencyPair  The curreny pair
+    # rate          price the order is selling at
+    # amount        Amount of coins to sell
+    # Outputs:
+    # orderNumber   The order number
+    def sell_post_only(self, currencyPair, rate, amount):
+        return self._private('sell', {"currencyPair": currencyPair, "rate": rate, "amount": amount, "postOnly": 1})
