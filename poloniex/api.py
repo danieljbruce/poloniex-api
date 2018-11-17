@@ -18,6 +18,8 @@ import calendar
 import hmac,hashlib
 import math
 
+import requests
+
 def createTimeStamp(datestr, format="%Y-%m-%d %H:%M:%S"):
     if type(datestr) in [date, datetime]:
         return calendar.timegm(datestr.timetuple())
@@ -67,9 +69,12 @@ class Poloniex:
                 'Key': self.APIKey
             }
             
-            ret = urlopen(Request('https://poloniex.com/tradingApi', post_data.encode('ascii'), headers))
+            # ret = urlopen(Request('https://poloniex.com/tradingApi', post_data.encode('ascii'), headers))
             # jsonRet = json.loads(ret.read())
             # return self.post_process(jsonRet)
+            ret = requests.post('https://poloniex.com/tradingApi', data=params, headers=headers)
+            jsonRet = json.loads(ret.text)
+            return self.post_process(jsonRet)
         
         if self.parseJson:
             return json.loads(ret.read().decode('utf-8'))
